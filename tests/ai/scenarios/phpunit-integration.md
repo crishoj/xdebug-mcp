@@ -58,7 +58,7 @@ composer x-test --stop-on-failure
 ### Step 2: Debug First Failure
 ```bash
 # Debug the failing test with MCP slash command
-echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/Unit/FailingTest.php","context":"First test failure debugging"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/Unit/FailingTest.php","context":"First test failure debugging"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
@@ -136,7 +136,7 @@ composer coverage
 composer x-test --stop-on-failure tests/Unit/NewFeatureTest.php
 
 # Step 2: Debug the failure
-echo '{"jsonrpc":"2.0","id":4,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/Unit/NewFeatureTest.php::testNewFeature","context":"TDD development debugging","breakpoints":"src/NewFeature.php:15"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":4,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/Unit/NewFeatureTest.php::testNewFeature","context":"TDD development debugging","breakpoints":"src/NewFeature.php:15"}}}' | php bin/xdebug-mcp
 
 # Step 3: After implementing, verify with trace
 echo '{"jsonrpc":"2.0","id":5,"method":"prompts/get","params":{"name":"x-trace","arguments":{"script":"vendor/bin/phpunit tests/Unit/NewFeatureTest.php::testNewFeature","context":"Verify implementation"}}}' | php bin/xdebug-mcp

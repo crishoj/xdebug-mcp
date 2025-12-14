@@ -12,13 +12,13 @@ First, verify there's a test that fails:
 vendor/bin/phpunit --stop-on-failure
 ```
 
-### Test x-debug with PHPUnit Failure
+### Test xstep with PHPUnit Failure
 ```bash
 # Option A: CLI (preferred for hands-on testing)
 ./bin/xdebug-debug --context="First test failure analysis" vendor/bin/phpunit --stop-on-failure tests/
 
 # Option B: JSON-RPC (for MCP-only environments)
-echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/","context":"First test failure analysis"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/","context":"First test failure analysis"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
@@ -51,7 +51,7 @@ echo '{"jsonrpc":"2.0","id":2,"method":"prompts/get","params":{"name":"x-trace",
 ./bin/xdebug-debug --context="Runtime error analysis" tests/fake/division-by-zero.php
 
 # Option B: JSON-RPC (for MCP-only environments)
-echo '{"jsonrpc":"2.0","id":3,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"tests/fake/division-by-zero.php","context":"Runtime error analysis","breakpoints":"auto-detect"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":3,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"tests/fake/division-by-zero.php","context":"Runtime error analysis","breakpoints":"auto-detect"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
@@ -99,7 +99,7 @@ echo '{"jsonrpc":"2.0","id":4,"method":"prompts/get","params":{"name":"x-profile
 ./bin/xdebug-debug --break="tests/fake/wrong-calculation.php:15" --break="tests/fake/wrong-calculation.php:25" --context="Logic error investigation" -- php tests/fake/wrong-calculation.php
 
 # Option B: JSON-RPC (for MCP-only environments)
-echo '{"jsonrpc":"2.0","id":5,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"tests/fake/wrong-calculation.php","context":"Logic error investigation","breakpoints":"tests/fake/wrong-calculation.php:15,tests/fake/wrong-calculation.php:25"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":5,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"tests/fake/wrong-calculation.php","context":"Logic error investigation","breakpoints":"tests/fake/wrong-calculation.php:15,tests/fake/wrong-calculation.php:25"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
@@ -123,7 +123,7 @@ echo '{"jsonrpc":"2.0","id":5,"method":"prompts/get","params":{"name":"x-debug",
 ./bin/xdebug-debug --context="Integration test failure analysis" -- php vendor/bin/phpunit --stop-on-failure tests/Integration/
 
 # Option B: JSON-RPC (for MCP-only environments)
-echo '{"jsonrpc":"2.0","id":6,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/Integration/","context":"Integration test failure analysis"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":6,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"vendor/bin/phpunit --stop-on-failure tests/Integration/","context":"Integration test failure analysis"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
@@ -156,7 +156,7 @@ echo '{"jsonrpc":"2.0","id":7,"method":"prompts/get","params":{"name":"x-trace",
 ./bin/xdebug-debug --context="This is an extremely long context description that tests how the system handles verbose context information that might be provided by users who want to give detailed background about what they are trying to debug and analyze in their code execution flow" -- php tests/fake/loop-counter.php
 
 # Option B: JSON-RPC (for MCP-only environments)
-echo '{"jsonrpc":"2.0","id":8,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"tests/fake/loop-counter.php","context":"This is an extremely long context description that tests how the system handles verbose context information that might be provided by users who want to give detailed background about what they are trying to debug and analyze in their code execution flow"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":8,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"tests/fake/loop-counter.php","context":"This is an extremely long context description that tests how the system handles verbose context information that might be provided by users who want to give detailed background about what they are trying to debug and analyze in their code execution flow"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**

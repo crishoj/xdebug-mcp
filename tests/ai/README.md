@@ -137,7 +137,7 @@ Test simplified system integration:
 ./bin/xdebug-debug --context="First failure debugging" --exit-on-break -- php vendor/bin/phpunit --stop-on-failure tests/Unit/DebugServerTest.php
 
 # Test MCP integration with vendor filtering (NEW FEATURE)
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"x-debug","arguments":{"script":"tests/fixtures/debug_test.php","include_vendor":"bear/*","context":"MCP vendor filtering test"}}}' | ./bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"xstep","arguments":{"script":"tests/fixtures/debug_test.php","include_vendor":"bear/*","context":"MCP vendor filtering test"}}}' | ./bin/xdebug-mcp
 # Expected: MCP tool accepts include_vendor parameter and passes it to underlying debug command
 ```
 

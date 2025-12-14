@@ -24,7 +24,7 @@ Universal PHP Xdebug MCP (Model Context Protocol) Server that enables AI assista
 ### AI Integration
 - 42+ MCP tools for debugging, profiling, coverage, and analysis
 - JSON-RPC 2.0 protocol for AI assistant communication
-- Claude Code slash commands: `/x-debug`, `/x-trace`, `/x-profile`
+- Claude Code slash commands: `/xstep`, `/xtrace`, `/xprofile`
 - Automatic tool detection and usage by AI assistants
 
 ### CLI Tools
@@ -108,9 +108,9 @@ echo "@vendor/koriym/xdebug-mcp/docs/debug_guideline_for_ai.md" >> CLAUDE.md
 claude mcp add xdebug php "$(pwd)/bin/xdebug-mcp"
 
 # Use slash commands
-/x-debug "script.php" "script.php:42:$error!=null" "" "Debug error handling"
-/x-profile script="api.php" context="Performance analysis" 
-/x-trace script="workflow.php" context="Execution flow analysis"
+/xstep --script="php script.php" --break="script.php:42:$error!=null" --context="Debug error handling"
+/xprofile --script="php api.php" --context="Performance analysis"
+/xtrace --script="php workflow.php" --context="Execution flow analysis"
 ```
 
 ## Testing & Development

@@ -682,6 +682,12 @@ final class McpServer
             return 'No result';
         }
 
+        // Handle nested content structure: content = ['type' => 'text', 'text' => '...']
+        if (isset($content['type']) && $content['type'] === 'text' && isset($content['text']) && is_string($content['text'])) {
+            return $content['text'];
+        }
+
+        // Fallback for direct text access
         return isset($content['text']) && is_string($content['text']) ? $content['text'] : 'No result';
     }
 

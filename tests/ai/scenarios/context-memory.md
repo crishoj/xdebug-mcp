@@ -33,14 +33,14 @@ echo '{"jsonrpc":"2.0","id":2,"method":"prompts/get","params":{"name":"x-trace",
 
 ### Step 1: Execute Debug Command
 ```bash
-# Execute x-debug with specific breakpoints and context
-echo '{"jsonrpc":"2.0","id":3,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"tests/fake/array-manipulation.php","context":"Array debugging session","breakpoints":"tests/fake/array-manipulation.php:8,tests/fake/array-manipulation.php:14"}}}' | php bin/xdebug-mcp
+# Execute xstep with specific breakpoints and context
+echo '{"jsonrpc":"2.0","id":3,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"tests/fake/array-manipulation.php","context":"Array debugging session","breakpoints":"tests/fake/array-manipulation.php:8,tests/fake/array-manipulation.php:14"}}}' | php bin/xdebug-mcp
 ```
 
 ### Step 2: Override Context Only
 ```bash
 # Use 'last' but override the context
-echo '{"jsonrpc":"2.0","id":4,"method":"prompts/get","params":{"name":"x-debug","arguments":{"last":"true","context":"Modified debugging context"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":4,"method":"prompts/get","params":{"name":"xstep","arguments":{"last":"true","context":"Modified debugging context"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
@@ -94,7 +94,7 @@ echo '{"jsonrpc":"2.0","id":8,"method":"prompts/get","params":{"name":"x-profile
 ### Step 1: Execute Command and Stop Server
 ```bash
 # Execute command
-echo '{"jsonrpc":"2.0","id":9,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"tests/fake/loop-counter.php","context":"Persistence test","breakpoints":"tests/fake/loop-counter.php:5"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":9,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"tests/fake/loop-counter.php","context":"Persistence test","breakpoints":"tests/fake/loop-counter.php:5"}}}' | php bin/xdebug-mcp
 
 # (Server stops after response)
 ```
@@ -102,7 +102,7 @@ echo '{"jsonrpc":"2.0","id":9,"method":"prompts/get","params":{"name":"x-debug",
 ### Step 2: Start New Server Session and Test 'last'
 ```bash
 # Try to use 'last' in new session
-echo '{"jsonrpc":"2.0","id":10,"method":"prompts/get","params":{"name":"x-debug","arguments":{"last":"true"}}}' | php bin/xdebug-mcp
+echo '{"jsonrpc":"2.0","id":10,"method":"prompts/get","params":{"name":"xstep","arguments":{"last":"true"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**

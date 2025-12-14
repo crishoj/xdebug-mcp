@@ -11,7 +11,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"prompts/list"}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**
-- Returns JSON with 4 prompts: x-trace, x-debug, x-profile, x-coverage
+- Returns JSON with 4 prompts: x-trace, xstep, x-profile, x-coverage
 - Each prompt has clear description and required/optional arguments
 - Response is well-formatted and comprehensible
 
@@ -43,8 +43,8 @@ echo '{"jsonrpc":"2.0","id":2,"method":"prompts/get","params":{"name":"x-trace",
 **Objective**: Test debugging functionality with specific breakpoints.
 
 ```bash
-# Test x-debug with breakpoint
-echo '{"jsonrpc":"2.0","id":3,"method":"prompts/get","params":{"name":"x-debug","arguments":{"script":"tests/fake/array-manipulation.php","context":"Debug array operations","breakpoints":"tests/fake/array-manipulation.php:10"}}}' | php bin/xdebug-mcp
+# Test xstep with breakpoint
+echo '{"jsonrpc":"2.0","id":3,"method":"prompts/get","params":{"name":"xstep","arguments":{"script":"tests/fake/array-manipulation.php","context":"Debug array operations","breakpoints":"tests/fake/array-manipulation.php:10"}}}' | php bin/xdebug-mcp
 ```
 
 **Expected Behavior:**

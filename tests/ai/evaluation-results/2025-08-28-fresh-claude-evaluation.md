@@ -37,11 +37,11 @@ The Xdebug MCP slash commands provide a well-designed interface for AI-driven PH
 
 **AI Analysis Quality**: Very high - trace data is comprehensive and well-structured.
 
-### `/x-debug` - Interactive Step Debugging  
+### `/xstep` - Interactive Step Debugging  
 **Status**: ✅ **Very Good**
 ```bash
 # Test Command
-/x-debug script="tests/fake/array-manipulation.php" context="Debug test evaluation" breakpoints="tests/fake/array-manipulation.php:10"
+/xstep script="tests/fake/array-manipulation.php" context="Debug test evaluation" breakpoints="tests/fake/array-manipulation.php:10"
 
 # Result:
 - Exit Code: 0 ✅  

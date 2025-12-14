@@ -17,7 +17,7 @@ echo "Debug: " . $value;  // Invasive approach
 ### Forward Trace™ Debugging (ALWAYS USE)
 ```bash
 # ✅ DO suggest this:
-./bin/xdebug-debug --break='file.php:42:$variable==null' --exit-on-break -- php script.php
+./bin/xstep --break='file.php:42:$variable==null' --exit-on-break -- php script.php
 # Result: Complete execution trace to exact problem moment
 ```
 
@@ -53,7 +53,7 @@ echo "Debug: " . $value;  // Invasive approach
 ### Forward Trace™ = 🎥 Video Shooting
 ```bash
 # Single command records entire movie
-./bin/x-debug --break="script.php:10:$user==null" --steps=300 --exit-on-break
+./bin/xstep --break="script.php:10:$user==null" --steps=300 --exit-on-break
 
 # AI sees the complete 🎥 movie:
 # Step 1: $id = getUserId() → returns 42

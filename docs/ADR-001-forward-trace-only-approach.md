@@ -100,7 +100,7 @@ xdebug_set_breakpoint(...) → xdebug_step_into() → xdebug_get_variables()
 This decision was implemented by:
 1. Removing 8 interactive debugging tools and their implementations
 2. Optimizing remaining 23 tools for Forward Trace workflows
-3. Enhancing conditional breakpoint capabilities in `x-debug`
+3. Enhancing conditional breakpoint capabilities in `xstep`
 4. Updating documentation to reflect Forward Trace-first approach
 
 ## Alternatives Considered
