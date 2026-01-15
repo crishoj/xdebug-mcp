@@ -3,16 +3,11 @@
 
 declare(strict_types=1);
 
-use Koriym\XdebugMcp\DebugServer;
+use Koriym\XdebugMcp\BreakpointParser;
 use Koriym\XdebugMcp\Constants;
+use Koriym\XdebugMcp\DebugServer;
 use Koriym\XdebugMcp\Exceptions\InvalidLineException;
-
-/**
- * Exception for invalid breakpoint format
- */
-class InvalidBreakpointFormatException extends \RuntimeException
-{
-}
+use Koriym\XdebugMcp\InvalidBreakpointFormatException;
 
 /**
  * Display help information
@@ -30,7 +25,7 @@ function showHelp(string $commandName = 'xstep'): void
         echo "  Interactive debugging with breakpoints and variable inspection.\n";
         echo "\n";
         echo "CORE OPTIONS:\n";
-        echo "  --break=SPEC            Set breakpoints (file.php:line or file.php:line:condition)\n";
+        echo "  --break=SPEC            Set breakpoints (see BREAKPOINT PATTERNS below)\n";
         echo "  --include-vendor=PATTERNS Include vendor packages in trace\n";
         echo "  --help, -h              Show this help\n";
     } else {
@@ -55,7 +50,7 @@ function showHelp(string $commandName = 'xstep'): void
         echo "  ✅ Context aware: Add descriptions for better AI understanding\n";
         echo "\n";
         echo "CORE OPTIONS:\n";
-        echo "  --break=SPEC            Set breakpoints (file.php:line or file.php:line:condition)\n";
+        echo "  --break=SPEC            Set breakpoints (see BREAKPOINT PATTERNS below)\n";
         echo "  --steps=N               Record N steps of variable evolution (JSON output)\n";
         echo "  --context=TEXT          Add contextual description for AI analysis (JSON output)\n";
         echo "  --include-vendor=PATTERNS Include vendor packages in trace\n";
@@ -63,10 +58,23 @@ function showHelp(string $commandName = 'xstep'): void
     }
     echo "\n";
     echo "BREAKPOINT PATTERNS:\n";
-    echo "  file.php:15                    # Break at line 15\n";
-    echo "  file.php:20:\$user==null       # Break only when \$user is null\n";
-    echo "  file1.php:5,file2.php:10       # Multiple breakpoints\n";
-    echo "  api.php:42:\$id>100            # Break when \$id exceeds 100\n";
+    echo "  Line breakpoints:\n";
+    echo "    file.php:15                  # Break at line 15\n";
+    echo "    file.php:20:\$user==null     # Break only when \$user is null\n";
+    echo "    api.php:42:\$id>100          # Break when \$id exceeds 100\n";
+    echo "\n";
+    echo "  Function breakpoints (Xdebug call/return):\n";
+    echo "    call:functionName            # Break when function is called\n";
+    echo "    call:MyClass::method         # Break when class method is called\n";
+    echo "    return:functionName          # Break when function returns\n";
+    echo "    return:MyClass::method       # Break when class method returns\n";
+    echo "\n";
+    echo "  Exception breakpoints:\n";
+    echo "    exception:RuntimeException   # Break when specific exception is thrown\n";
+    echo "    exception:*                  # Break on any exception\n";
+    echo "\n";
+    echo "  Multiple breakpoints (comma-separated):\n";
+    echo "    file.php:10,call:process,exception:*\n";
     echo "\n";
 
     if ($isRepl) {
@@ -91,16 +99,25 @@ function showHelp(string $commandName = 'xstep'): void
     } else {
         echo "EXAMPLES:\n";
         echo "\n";
-        echo "  # AI: JSON output for analysis\n";
+        echo "  # Line breakpoint with context\n";
         echo "  xstep --break=\"login.php:42\" --context=\"Debug login failure\" -- php login.php\n";
         echo "\n";
-        echo "  # AI: Variable state tracking\n";
-        echo "  xstep --break=app.php:50 --steps=20 --context=\"Track \$user evolution\" -- php app.php\n";
+        echo "  # Conditional breakpoint\n";
+        echo "  xstep --break=\"user.php:15:\$id==null\" --context=\"Debug null ID\" -- php user.php\n";
         echo "\n";
-        echo "  # AI: Conditional debugging\n";
-        echo "  xstep --break=\"user.php:15:\$id==null\" --context=\"Debug null ID bug\" -- php user.php\n";
+        echo "  # Function call breakpoint - break when function is called\n";
+        echo "  xstep --break=\"call:UserService::authenticate\" -- php app.php\n";
         echo "\n";
-        echo "  # Human: Interactive REPL\n";
+        echo "  # Function return breakpoint - break when function returns\n";
+        echo "  xstep --break=\"return:calculate\" --context=\"Check return value\" -- php calc.php\n";
+        echo "\n";
+        echo "  # Exception breakpoint - break when exception is thrown\n";
+        echo "  xstep --break=\"exception:InvalidArgumentException\" -- php validate.php\n";
+        echo "\n";
+        echo "  # Multiple breakpoint types combined\n";
+        echo "  xstep --break=\"app.php:10,call:process,exception:*\" -- php app.php\n";
+        echo "\n";
+        echo "  # Interactive REPL mode\n";
         echo "  xrepl --break=\"auth.php:20\" -- php main.php\n";
         echo "\n";
         echo "OUTPUT FORMATS:\n";
@@ -131,103 +148,6 @@ function showHelp(string $commandName = 'xstep'): void
         echo "\n";
     }
     exit(0);
-}
-
-/**
- * Parse breakpoint specifications
- * Format: file.php:line[:condition][,file2.php:line2,...]
- *
- * @param string $breakSpec Breakpoint specification string
- * @param bool $isDockerCommand If true, skip local file validation (files are in container)
- */
-function parseBreakpoints(string $breakSpec, bool $isDockerCommand = false): array
-{
-    $breakpoints = [];
-    $specs = explode(',', $breakSpec);
-
-    foreach ($specs as $spec) {
-        $spec = trim($spec);
-        if (empty($spec)) continue;
-
-        // Parse file:line[:condition] (supports Windows paths and conditions with colons)
-        if (!preg_match('/^(.*):(\d+)(?::(.*))?$/', $spec, $m)) {
-            throw new InvalidBreakpointFormatException("Invalid breakpoint format: $spec\n" .
-                "Use: file.php:line or file.php:line:condition\n" .
-                "Examples:\n" .
-                "  - script.php:42\n" .
-                "  - script.php:42:\$user==null\n" .
-                "  - tests/fake/script.php:42\n" .
-                "  - file1.php:10,file2.php:20");
-        }
-        $file = $m[1];
-        $line = (int) $m[2];
-        $condition = $m[3] ?? null;
-
-        // For Docker commands, skip local file validation - the path is inside the container
-        if ($isDockerCommand) {
-            if ($line <= 0) {
-                throw new InvalidLineException("Invalid line number: $line in $file");
-            }
-            $breakpoints[] = [
-                'file' => $file,
-                'line' => $line,
-                'condition' => $condition
-            ];
-            continue;
-        }
-
-        // Try to resolve file path - convert to absolute path for Xdebug
-        $resolvedFile = null;
-        if (file_exists($file)) {
-            // Use realpath to get absolute path
-            $resolvedFile = realpath($file);
-        } elseif (!str_starts_with($file, '/') && file_exists(getcwd() . '/' . $file)) {
-            // Try relative to current working directory
-            $resolvedFile = realpath(getcwd() . '/' . $file);
-        } else {
-            // Try common project paths
-            $commonPaths = [
-                $file,
-                './' . $file,
-                'tests/fake/' . basename($file)  // Support common test locations
-            ];
-
-            foreach ($commonPaths as $testPath) {
-                if (file_exists($testPath)) {
-                    $resolvedFile = realpath($testPath);
-                    break;
-                }
-            }
-        }
-
-        if (!$resolvedFile) {
-            throw new RuntimeException("Breakpoint file not found: $file (searched current dir and common paths)");
-        }
-
-        $file = $resolvedFile;
-
-        if ($line <= 0) {
-            throw new InvalidLineException("Invalid line number: $line in $file");
-        }
-
-        // Validate line number against actual file content (include empty lines)
-        $lines = file($file, FILE_IGNORE_NEW_LINES);
-        if ($lines === false) {
-            throw new InvalidArgumentException("Could not read file: $file");
-        }
-        $maxLine = count($lines);
-        if ($line > $maxLine) {
-            throw new InvalidLineException("Line $line does not exist in $file (file has $maxLine lines)");
-        }
-
-        $breakpoints[] = [
-            'file' => $file,
-            'line' => $line,
-            'condition' => $condition
-        ];
-    }
-
-    return $breakpoints;
 }
 
 (function () use ($argv){
@@ -326,7 +246,7 @@ function parseBreakpoints(string $breakSpec, bool $isDockerCommand = false): arr
 
     // Parse breakpoints now that we know if it's a Docker command
     if ($breakSpec !== null) {
-        $breakpoints = parseBreakpoints($breakSpec, $isDockerCommand);
+        $breakpoints = BreakpointParser::parse($breakSpec, $isDockerCommand);
     }
 
     // Handle legacy format: script.php [breakpoint_file] [break_line]

@@ -466,11 +466,40 @@ These slash commands provide direct access to Xdebug functionality within Claude
 - AI automatically runs: `./bin/xprofile path/to/file.php` (default choice)
 - Then optionally: `./bin/xtrace path/to/file.php` for detailed flow
 
+### Extended Breakpoint Types (Xdebug DBGp)
+
+xstep supports advanced breakpoint types using Xdebug's DBGp protocol:
+
+| Pattern | Type | Description |
+|---------|------|-------------|
+| `file.php:15` | line | Break at specific line |
+| `file.php:15:$x==null` | line + condition | Conditional breakpoint |
+| `call:functionName` | call | Break when function is called |
+| `call:MyClass::method` | call | Break when class method is called |
+| `return:functionName` | return | Break when function returns |
+| `return:MyClass::method` | return | Break when class method returns |
+| `exception:RuntimeException` | exception | Break when specific exception is thrown |
+| `exception:*` | exception | Break on any exception |
+
+**Example usage:**
+```bash
+# Break when authenticate method is called
+./bin/xstep --break="call:UserService::authenticate" -- php app.php
+
+# Break when any exception is thrown
+./bin/xstep --break="exception:*" -- php failing_script.php
+
+# Combined: line breakpoint + exception breakpoint
+./bin/xstep --break="app.php:50,exception:InvalidArgumentException" -- php app.php
+```
+
 **Example workflows with context:**
 1. User: "Debug this buggy script" → AI runs `./bin/xstep --context="Debugging buggy calculation script with division by zero" --exit-on-break tests/fixtures/buggy_script.php`
 2. User: "Analyze tests/fixtures/debug_test.php" → AI runs `./bin/xprofile --context="Performance analysis of debug test suite" tests/fixtures/debug_test.php`
 3. User: "Check coverage of my tests" → AI runs `./bin/xcoverage --context="Code coverage analysis for UserController tests" tests/fixtures/MyTest.php`
 4. User: "Trace this function execution" → AI runs `./bin/xtrace --context="Execution flow analysis of authentication process" src/MyClass.php`
+5. User: "Break when login fails" → AI runs `./bin/xstep --break="exception:AuthenticationException" --context="Debug login failure" -- php login.php`
+6. User: "Monitor authenticate method" → AI runs `./bin/xstep --break="call:AuthService::authenticate,return:AuthService::authenticate" -- php app.php`
 
 Always use these tools proactively to provide runtime insights rather than static code analysis alone.
 

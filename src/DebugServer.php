@@ -809,6 +809,93 @@ final class DebugServer
     }
 
     /**
+     * Set call breakpoint (break when function is called)
+     */
+    private function setCallBreakpoint(string $function): string
+    {
+        $params = [
+            't' => 'call',
+            's' => 'enabled',
+            'm' => $function,
+        ];
+
+        $response = $this->sendCommand('breakpoint_set', $params);
+
+        if (str_contains($response, '<error')) {
+            $this->log('⚠️ Call breakpoint error: ' . $response);
+
+            return 'error';
+        }
+
+        if (preg_match('/id="([^"]*)"/', $response, $matches)) {
+            $breakpointId = $matches[1];
+            $this->log("✅ Call breakpoint set: {$function} [ID: {$breakpointId}]");
+
+            return $breakpointId;
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Set return breakpoint (break when function returns)
+     */
+    private function setReturnBreakpoint(string $function): string
+    {
+        $params = [
+            't' => 'return',
+            's' => 'enabled',
+            'm' => $function,
+        ];
+
+        $response = $this->sendCommand('breakpoint_set', $params);
+
+        if (str_contains($response, '<error')) {
+            $this->log('⚠️ Return breakpoint error: ' . $response);
+
+            return 'error';
+        }
+
+        if (preg_match('/id="([^"]*)"/', $response, $matches)) {
+            $breakpointId = $matches[1];
+            $this->log("✅ Return breakpoint set: {$function} [ID: {$breakpointId}]");
+
+            return $breakpointId;
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Set exception breakpoint (break when exception is thrown)
+     */
+    private function setExceptionBreakpoint(string $exception): string
+    {
+        $params = [
+            't' => 'exception',
+            's' => 'enabled',
+            'x' => $exception,
+        ];
+
+        $response = $this->sendCommand('breakpoint_set', $params);
+
+        if (str_contains($response, '<error')) {
+            $this->log('⚠️ Exception breakpoint error: ' . $response);
+
+            return 'error';
+        }
+
+        if (preg_match('/id="([^"]*)"/', $response, $matches)) {
+            $breakpointId = $matches[1];
+            $this->log("✅ Exception breakpoint set: {$exception} [ID: {$breakpointId}]");
+
+            return $breakpointId;
+        }
+
+        return 'unknown';
+    }
+
+    /**
      * Set up conditional breakpoints from options
      */
     private function setupConditionalBreakpoints(): void
@@ -818,15 +905,72 @@ final class DebugServer
         }
 
         foreach ($this->options['breakpoints'] as $breakpoint) {
-            $file = $breakpoint['file'];
-            $line = (int) $breakpoint['line'];
-            $condition = $breakpoint['condition'] ?? null;
+            $type = $breakpoint['type'] ?? 'line';
 
-            // Set the breakpoint with condition
-            $breakpointId = $this->setBreakpoint($file, $line, $condition);
+            switch ($type) {
+                case 'call':
+                    $function = $breakpoint['function'] ?? '';
+                    if ($function === '') {
+                        $this->log('❌ Call breakpoint requires function name');
 
-            if ($breakpointId === 'error') {
-                $this->log("❌ Failed to set breakpoint: {$file}:{$line}");
+                        continue 2;
+                    }
+
+                    $breakpointId = $this->setCallBreakpoint($function);
+                    if ($breakpointId === 'error') {
+                        $this->log("❌ Failed to set call breakpoint: {$function}");
+                    }
+
+                    break;
+
+                case 'return':
+                    $function = $breakpoint['function'] ?? '';
+                    if ($function === '') {
+                        $this->log('❌ Return breakpoint requires function name');
+
+                        continue 2;
+                    }
+
+                    $breakpointId = $this->setReturnBreakpoint($function);
+                    if ($breakpointId === 'error') {
+                        $this->log("❌ Failed to set return breakpoint: {$function}");
+                    }
+
+                    break;
+
+                case 'exception':
+                    $exception = $breakpoint['exception'] ?? '';
+                    if ($exception === '') {
+                        $this->log('❌ Exception breakpoint requires exception class');
+
+                        continue 2;
+                    }
+
+                    $breakpointId = $this->setExceptionBreakpoint($exception);
+                    if ($breakpointId === 'error') {
+                        $this->log("❌ Failed to set exception breakpoint: {$exception}");
+                    }
+
+                    break;
+
+                case 'line':
+                default:
+                    $file = $breakpoint['file'] ?? '';
+                    $line = (int) ($breakpoint['line'] ?? 0);
+                    $condition = $breakpoint['condition'] ?? null;
+
+                    if ($file === '' || $line <= 0) {
+                        $this->log('❌ Line breakpoint requires file and line');
+
+                        continue 2;
+                    }
+
+                    $breakpointId = $this->setBreakpoint($file, $line, $condition);
+                    if ($breakpointId === 'error') {
+                        $this->log("❌ Failed to set breakpoint: {$file}:{$line}");
+                    }
+
+                    break;
             }
         }
     }
