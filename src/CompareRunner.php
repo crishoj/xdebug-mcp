@@ -27,7 +27,7 @@ use const JSON_UNESCAPED_UNICODE;
  * Runs xstep twice with different commands/inputs and produces a diff
  * of variable states at the specified breakpoint.
  */
-final class CompareRunner
+class CompareRunner
 {
     /** @param array{break: string, run_a: string, run_b: string, label_a?: string, label_b?: string, context?: string, steps?: int, include_vendor?: string} $options */
     public function __construct(
@@ -94,7 +94,7 @@ final class CompareRunner
      *
      * @return array<string, mixed>
      */
-    private function executeXstep(string $command): array
+    protected function executeXstep(string $command): array
     {
         $xstepBin = __DIR__ . '/../bin/xstep';
         $breakArg = escapeshellarg('--break=' . $this->options['break']);
